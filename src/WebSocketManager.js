@@ -70,4 +70,15 @@ export class WebSocketManager {
             this.send(message);
         }
     }
+
+    /**
+     * Cierra la conexión WebSocket de forma limpia
+     */
+    disconnect() {
+        if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+            this.ws.close();
+        }
+        this.isReady = false;
+        this.messageQueue = [];
+    }
 }

@@ -28,4 +28,21 @@ export class PeerConnectionManager {
             this.peerConnections.delete(userId);
         }
     }
+
+    /**
+     * Cierra todas las conexiones peer y limpia los recursos
+     */
+    closeAllConnections() {
+        // Cerrar todas las conexiones peer
+        for (const [userId, connection] of this.peerConnections) {
+            connection.close();
+            this.peerConnections.delete(userId);
+        }
+
+        // Detener el stream local si existe
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+    }
 }

@@ -41,7 +41,40 @@ export class VideoConferenceApp {
 
         await this.setupLocalMedia(); // Paso 1: Configurar medios locales (Cámara/Micrófono).
         this.registerWebSocketHandlers(); // Paso 2: Registrar manejadores de eventos del WebSocket.
-        this.wsManager.connect(); // Paso 3: Conectar al servidor WebSocket.
+        this.setupUIHandlers(); // Paso 3: Configurar manejadores de UI
+        this.wsManager.connect(); // Paso 4: Conectar al servidor WebSocket.
+    }
+
+    /**
+     * Configura los manejadores de eventos de la interfaz de usuario
+     */
+    setupUIHandlers() {
+        UIManager.onHangup(() => this.handleHangup());
+    }
+
+    /**
+     * Maneja el evento de colgar la llamada
+     */
+    async handleHangup() {
+        // 1. Detener todos los streams y cerrar conexiones
+        this.peerManager.closeAllConnections();
+        
+        // 2. Detener el stream local
+        if (this.localVideoElement.srcObject) {
+            this.localVideoElement.srcObject.getTracks().forEach(track => track.stop());
+            this.localVideoElement.srcObject = null;
+        }
+        
+        // 3. Desconectar del WebSocket
+        this.wsManager.disconnect();
+        
+        // 4. Actualizar la UI
+        UIManager.handleDisconnection();
+        
+        // 5. Redireccionar después de una breve pausa para mostrar la animación
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     }
 
     /**
